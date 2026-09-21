@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover" />
+  <title>SAVOmart — Combined Mockup</title>
+  <link rel="icon" type="image/png" href="./images/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;0,800;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <style>
+    :root {
+      --purple: #5c2a82;
+      --purple-dark: #3d1a5c;
+      --purple-light: #7a3db3;
+      --purple-soft: #f4effa;
+      --yellow: #ffd400;
+      --yellow-dark: #e0ad00;
+      --cream: #fffaf1;
+      --ink: #2c2436;
+      --muted: #746c85;
+      --line: #ece4f5;
+      --green: #1c8a4c;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      overflow-x: hidden;
+      font-family: "Inter", sans-serif;
+      color: var(--ink);
+      background-color: var(--cream);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cg fill='none' stroke='%235c2a82' stroke-width='2' opacity='0.07' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='30' cy='34' r='19'/%3E%3Cpath d='M21 34l6.5 6.5L40 27'/%3E%3Cpath d='M108 26h18l-2.5 16h-13z'/%3E%3Cpath d='M113 26v-4.5a4.5 4.5 0 019 0V26'/%3E%3Cpath d='M28 108c0-10 6-16 12-16s12 6 12 16'/%3E%3Cpath d='M24 108h32'/%3E%3Ccircle cx='118' cy='118' r='13'/%3E%3Cpath d='M111 118l5 5l9-10'/%3E%3C/g%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-attachment: fixed;
+    }
+
+    /* Decorative background collage — real category photography + logo mark */
+    .bg-decor { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+    .bg-decor img { position: absolute; opacity: 0.12; filter: saturate(0.75); }
+    .bg-decor .d1 { width: 150px; top: 6%; left: -30px; transform: rotate(-10deg); }
+    .bg-decor .d2 { width: 130px; top: 58%; left: -22px; transform: rotate(8deg); }
+    .bg-decor .d3 { width: 155px; top: 16%; right: -35px; transform: rotate(12deg); }
+    .bg-decor .d4 { width: 135px; top: 68%; right: -25px; transform: rotate(-10deg); }
+    .bg-decor .logo-mark { width: 90px; opacity: 0.10; }
+    .bg-decor .l1 { top: 32%; left: 6%; transform: rotate(-18deg); }
+    .bg-decor .l2 { top: 84%; right: 10%; transform: rotate(14deg); }
+
+    img { max-width: 100%; display: block; }
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; margin: 0; padding: 0; }
+
+    .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+    /* Offer bar (from Bold Brand) */
+    .offer-bar {
+      background: var(--yellow); color: var(--purple-dark);
+      font-family: "DM Sans", sans-serif; font-weight: 700; font-size: 13px;
+      letter-spacing: 0.3px; padding: 8px 0; overflow: hidden; white-space: nowrap;
+    }
+    .offer-bar span { display: inline-block; padding-left: 100%; animation: scroll-left 22s linear infinite; }
+    @keyframes scroll-left { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+
+    /* Header (Signature Pattern style) */
+    header {
+      position: sticky; top: 0; z-index: 200;
+      background: rgba(255,250,241,0.9);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+    }
+    .header-wrapper { display: flex; align-items: center; justify-content: space-between; height: 76px; }
+    .logo { display: flex; align-items: center; gap: 10px; }
+    .logo img { height: 40px; }
+    .logo-full { width: auto; border-radius: 10px; box-shadow: 0 4px 10px rgba(92,42,130,0.2); }
+    .logo .wordmark { font-family: "DM Sans", sans-serif; font-weight: 800; font-size: 22px; }
+    .logo .wordmark .savo { color: var(--yellow-dark); }
+    .logo .wordmark .mart { color: var(--purple); font-weight: 600; }
+
+    nav.menu { display: flex; align-items: center; gap: 4px; }
+    nav.menu a {
+      font-size: 14px; font-weight: 600; color: var(--ink);
+      padding: 10px 16px; border-radius: 20px; transition: background .2s, color .2s;
+    }
+    nav.menu a:hover { background: var(--purple-soft); color: var(--purple); }
+    .cta-btn {
+      background: linear-gradient(135deg, var(--yellow), var(--yellow-dark));
+      color: var(--purple-dark) !important;
+      font-family: "DM Sans", sans-serif; font-weight: 800; font-size: 13.5px;
+      padding: 12px 20px; border-radius: 22px; margin-left: 8px;
+      box-shadow: 0 6px 16px rgba(255,180,0,0.35);
+      transition: transform .15s, box-shadow .15s;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255,180,0,0.45); }
+
+    /* Hero (Bold Brand style) */
+    .hero { padding: 56px 0 0; }
+    .hero-panel {
+      background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 100%);
+      position: relative; overflow: hidden; border-radius: 32px; padding: 54px;
+    }
+    .hero-panel::before {
+      content: ""; position: absolute; top: -80px; right: -80px; width: 320px; height: 320px;
+      background: var(--yellow); border-radius: 50%; opacity: 0.15;
+    }
+    .hero-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 24px; position: relative; z-index: 1; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.14); color: var(--yellow);
+      font-family: "DM Sans", sans-serif; font-weight: 700; font-size: 13px;
+      padding: 6px 14px; border-radius: 20px; margin-bottom: 20px;
+    }
+    .hero-copy h1 {
+      font-family: "DM Sans", sans-serif; font-weight: 800; font-size: 44px; line-height: 1.14;
+      color: #fff; margin: 0 0 18px;
+    }
+    .hero-copy h1 em { font-style: normal; color: var(--yellow); }
+    .hero-copy p { font-size: 16.5px; line-height: 1.6; color: rgba(255,255,255,0.85); max-width: 460px; margin: 0 0 28px; }
+    .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+    .btn-yellow {
+      background: var(--yellow); color: var(--purple-dark);
+      font-family: "DM Sans", sans-serif; font-weight: 800; font-size: 15px;
+      padding: 15px 26px; border-radius: 28px; transition: transform .15s; border: none; cursor: pointer;
+    }
+    .btn-yellow:hover { transform: translateY(-2px); }
+    .btn-outline {
+      border: 2px solid rgba(255,255,255,0.5); color: #fff;
+      font-family: "DM Sans", sans-serif; font-weight: 700; font-size: 15px;
+      padding: 13px 24px; border-radius: 28px; transition: border-color .15s;
+    }
+    .btn-outline:hover { border-color: #fff; }
+    .hero-image { position: relative; z-index: 2; text-align: center; }
+    .hero-image img { max-width: 88%; margin: 0 auto; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.35)); }
+    .hero-trust-chip {
+      position: absolute; bottom: 6%; right: 4%; z-index: 3;
+      background: #fff; border-radius: 30px; padding: 12px 18px 12px 14px;
+      display: flex; align-items: center; gap: 8px;
+      font-family: "DM Sans", sans-serif; font-weight: 700; font-size: 13.5px; color: var(--ink);
+      box-shadow: 0 12px 26px rgba(0,0,0,0.22);
+    }
+    .hero-trust-chip .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--purple); flex-shrink: 0; }
+
+    /* Stat strip */
+    .stat-strip { padding: 24px 0; }
+    .stat-strip .container {
+      display: flex; justify-content: space-around; flex-wrap: wrap; gap: 18px; text-align: center;
+      background: #fff; border-radius: 20px; padding: 22px; box-shadow: 0 8px 20px rgba(92,42,130,0.08);
+    }
+    .stat-strip .stat-num { font-family: "DM Sans", sans-serif; font-weight: 800; font-size: 23px; color: var(--purple); }
+    .stat-strip .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .section { padding: 62px 0; }
+    .section-title { font-family: "DM Sans", sans-serif; font-weight: 800; font-size: 30px; color: var(--purple-dark); margin: 0 0 6px; }
+    .section-sub { color: var(--muted); font-size: 15px; margin: 0 0 34px; }
+
+    /* Categories (Signature Pattern style) */
+    .cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+    .cat-item {
+      background: #fff; border-radius: 22px; padding: 26px 14px 22px; text-align: center;
+      box-shadow: 0 6px 16px rgba(92,42,130,0.06); transition: transform .2s, box-shadow .2s;
+    }
+    .cat-item:hover { transform: translateY(-6px); box-shadow: 0 16px 30px rgba(92,42,130,0.14); }
+    .cat-photo-wrap { width: 84px; height: 84px; margin: 0 auto 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .cat-item:nth-child(8n+1) .cat-photo-wrap { background: #e9f6e4; }
+    .cat-item:nth-child(8n+2) .cat-photo-wrap { background: #eaf1fb; }
+    .cat-item:nth-child(8n+3) .cat-photo-wrap { background: #fdf0dd; }
+    .cat-item:nth-child(8n+4) .cat-photo-wrap { background: #fce9ec; }
+    .cat-item:nth-child(8n+5) .cat-photo-wrap { background: #f1e6d8; }
+    .cat-item:nth-child(8n+6) .cat-photo-wrap { background: #fdeed2; }
+    .cat-item:nth-child(8n+7) .cat-photo-wrap { background: #fff6dc; }
+    .cat-item:nth-child(8n+8) .cat-photo-wrap { background: #e7f3f3; }
+    .cat-item img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
+    .cat-item span { font-size: 13.5px; font-weight: 700; color: var(--ink); font-family: "DM Sans", sans-serif; }
+
+    /* ===== Store Locator / Map (from Store Locator mock) ===== */
+    .locator-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; align-items: stretch; }
+    .map-panel { border-radius: 24px; overflow: hidden; box-shadow: 0 18px 40px -10px rgba(92,42,130,0.35); position: relative; min-height: 560px; }
+    #store-map { width: 100%; height: 560px; }
+    .find-fab {
+      position: absolute; top: 18px; left: 18px; z-index: 500;
+      background: var(--purple); color: #fff; font-family: "DM Sans", sans-serif; font-weight: 700; font-size: 14px;
+      border: none; border-radius: 30px; padding: 13px 20px; display: flex; align-items: center; gap: 8px;
+      cursor: pointer; box-shadow: 0 10px 22px rgba(0,0,0,0.25); transition: background .2s, transform .15s;
+    }
+    .find-fab:hover { background: var(--purple-light); transform: translateY(-2px); }
+    .find-fab:disabled { opacity: 0.7; cursor: progress; transform: none; }
+    .find-fab .pulse {
+      width: 10px; height: 10px; border-radius: 50%; background: var(--yellow);
+      box-shadow: 0 0 0 0 rgba(255,212,0,0.7); animation: pulse 1.6s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255,212,0,0.6); }
+      70% { box-shadow: 0 0 0 10px rgba(255,212,0,0); }
+      100% { box-shadow: 0 0 0 0 rgba(255,212,0,0); }
+    }
+    .sidebar-panel { background: #fff; border-radius: 24px; padding: 22px; display: flex; flex-direction: column; min-height: 560px; max-height: 560px; box-shadow: 0 6px 16px rgba(92,42,130,0.06); }
+    .nearest-result { display: none; background: var(--purple); color: #fff; border-radius: 16px; padding: 16px 18px; margin-bottom: 16px; position: relative; overflow: hidden; }
+    .nearest-result.show { display: block; }
+    .nearest-result .tag { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--yellow); margin-bottom: 6px; }
+    .nearest-result h4 { margin: 0 0 4px; font-family: "DM Sans", sans-serif; font-size: 17px; }
+    .nearest-result p { margin: 0 0 12px; font-size: 13px; color: rgba(255,255,255,0.85); line-height: 1.5; }
+    .nearest-result .dist { display: inline-block; background: rgba(255,255,255,0.15); font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 10px; margin-bottom: 12px; }
+    .nearest-result .directions-link { display: inline-flex; align-items: center; gap: 6px; background: var(--yellow); color: var(--purple-dark); font-weight: 700; font-size: 13px; padding: 9px 16px; border-radius: 20px; }
+    .nearest-result .back-link {
+      display: inline-flex; align-items: center; gap: 6px; margin-left: 8px;
+      background: transparent; border: 1.5px solid rgba(255,255,255,0.4); color: #fff;
+      font-weight: 700; font-size: 13px; padding: 8px 14px; border-radius: 20px;
+      cursor: pointer; transition: border-color .15s, background .15s;
+    }
+    .nearest-result .back-link:hover { border-color: #fff; background: rgba(255,255,255,0.08); }
+    .locator-status { font-size: 13px; color: var(--muted); margin-bottom: 14px; min-height: 18px; }
+    .locator-status.error { color: #c0392b; }
+    .store-list-title { font-family: "DM Sans", sans-serif; font-weight: 700; font-size: 15px; color: var(--purple-dark); margin-bottom: 10px; }
+    .store-list { overflow-y: auto; flex: 1; padding-right: 4px; }
+    .store-list::-webkit-scrollbar { width: 6px; }
+    .store-list::-webkit-scrollbar-thumb { background: #ddd0ea; border-radius: 4px; }
+    .store-row { background: var(--cream); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; cursor: pointer; transition: box-shadow .15s, border-color .15s; border: 1.5px solid transparent; }
+    .store-row:hover { box-shadow: 0 6px 14px rgba(92,42,130,0.1); }
+    .store-row.nearest { border-color: var(--yellow); background: #fffdf3; }
+    .store-row .name { font-family: "DM Sans", sans-serif; font-weight: 700; font-size: 13.5px; color: var(--ink); display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+    .store-row .addr { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .store-row .badge-nearest { background: var(--yellow); color: var(--purple-dark); font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 8px; text-transform: uppercase; }
+    .leaflet-popup-content { font-family: "Inter", sans-serif; font-size: 13px; }
+    .leaflet-popup-content b { color: var(--purple-dark); font-family: "DM Sans", sans-serif; }
+
+    /* Why us */
+    .why-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+    .why-card { background: #fff; border-radius: 22px; padding: 28px 20px; text-align: center; box-shadow: 0 6px 16px rgba(92,42,130,0.06); display: flex; flex-direction: column; }
+    .why-card img { width: 68px; height: 68px; margin: 0 auto 18px; }
+    .why-card h3 {
+      font-family: "DM Sans", sans-serif; font-size: 19px; line-height: 1.3; color: var(--purple-dark);
+      margin: 0 0 10px; min-height: 2.6em; display: flex; align-items: center; justify-content: center;
+    }
+    .why-card p { font-size: 14.5px; line-height: 1.6; color: var(--muted); margin: 0; }
+
+    /* Who we are */
+    .who-grid { display: grid; grid-template-columns: 1fr 420px; gap: 48px; align-items: center; background: var(--purple); border-radius: 28px; padding: 48px; }
+    .who-grid .section-title, .who-grid .section-sub { color: #fff; }
+    .who-grid .section-sub { color: rgba(255,255,255,0.8); }
+    .who-text p { color: rgba(255,255,255,0.9); font-size: 15.5px; line-height: 1.7; }
+    .who-grid img { border-radius: 20px; }
+
+    /* Testimonials — circular coverflow carousel */
+    .testi-carousel { position: relative; max-width: 980px; margin: 0 auto; padding: 0 70px; }
+    .testi-stage { position: relative; height: 280px; overflow: hidden; }
+    .testi-card {
+      position: absolute; top: 0; left: 50%; width: 600px; height: 280px; margin-left: -300px;
+      box-sizing: border-box; background: #fff; border-radius: 22px; padding: 30px 50px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+      box-shadow: 0 16px 36px -12px rgba(92,42,130,0.28);
+      transition: transform .6s cubic-bezier(.4,0,.2,1), opacity .6s ease, filter .6s ease;
+      will-change: transform, opacity, filter;
+    }
+    .testi-card.is-active { cursor: default; }
+    .testi-stars { color: var(--yellow-dark); font-size: 18px; letter-spacing: 2px; margin-bottom: 14px; }
+    .testi-quote {
+      font-family: "DM Sans", sans-serif; font-size: 17px; font-weight: 500; line-height: 1.5; color: var(--purple-dark);
+      margin: 0 0 18px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .testi-author { font-family: "DM Sans", sans-serif; font-weight: 700; font-size: 15px; color: var(--purple); }
+    .testi-author span { font-weight: 500; color: var(--muted); }
+    .testi-meta { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+    .testi-meta a { color: var(--purple); font-weight: 600; text-decoration: none; }
+    .testi-meta a:hover { text-decoration: underline; }
+    .testi-arrow {
+      position: absolute; top: 50%; transform: translateY(-50%); width: 46px; height: 46px; border-radius: 50%;
+      background: #fff; border: none; cursor: pointer; z-index: 20; color: var(--purple);
+      box-shadow: 0 10px 24px -8px rgba(92,42,130,0.35); display: flex; align-items: center; justify-content: center;
+      transition: background .2s, color .2s, transform .2s;
+    }
+    .testi-arrow svg { width: 20px; height: 20px; }
+    .testi-arrow:hover { background: var(--purple); color: #fff; }
+    .testi-arrow:active { transform: translateY(-50%) scale(0.92); }
+    .testi-arrow-prev { left: 0; }
+    .testi-arrow-next { right: 0; }
+    @media (prefers-reduced-motion: reduce) {
+      .testi-card { transition: none; }
+    }
+
+    /* Footer — single compact bar */
+    footer { background: var(--purple-dark); color: #fff; padding: 14px 0; margin-top: 20px; border-radius: 30px 30px 0 0; }
+    .foot-bar { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 18px; row-gap: 10px; }
+    .foot-sep { color: rgba(255,255,255,0.3); font-size: 14px; }
+    .foot-bar a {
+      display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; color: rgba(255,255,255,0.85);
+      text-decoration: none; transition: color .2s; white-space: nowrap;
+    }
+    .foot-bar a img { width: 14px; filter: invert(1); opacity: 0.85; }
+    .foot-bar a:hover { color: var(--yellow); }
+    .foot-bar a.foot-underline { text-decoration: underline; }
+    .foot-copyright { font-size: 13px; color: rgba(255,255,255,0.7); white-space: nowrap; }
+
+    @media (max-width: 1023px) {
+      .container { padding: 0 18px; }
+      nav.menu { display: none; }
+      .hero-panel { padding: 30px; }
+      .hero-grid { grid-template-columns: 1fr; }
+      .hero-copy { text-align: center; }
+      .hero-copy p { margin-left: auto; margin-right: auto; }
+      .hero-actions { justify-content: center; }
+      .hero-copy h1 { font-size: 32px; }
+      .cat-grid { grid-template-columns: repeat(2, 1fr); }
+      .locator-grid { grid-template-columns: 1fr; }
+      #store-map, .map-panel, .sidebar-panel { min-height: 420px; height: 420px; }
+      .why-grid { grid-template-columns: repeat(2, 1fr); }
+      .who-grid { grid-template-columns: 1fr; padding: 28px; }
+      .testi-carousel { padding: 0 44px; max-width: 100%; }
+      .testi-stage { height: 240px; }
+      .testi-card { width: 300px; height: 240px; margin-left: -150px; padding: 24px 26px; }
+      .testi-quote { font-size: 15px; }
+      .testi-arrow { width: 40px; height: 40px; }
+      .bg-decor img { opacity: 0.07; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-decor" aria-hidden="true">
+    <img class="d1" src="./images/icon-fruit.png" alt="" />
+    <img class="d2" src="./images/icon-grains.png" alt="" />
+    <img class="d3" src="./images/icon-dairy.png" alt="" />
+    <img class="d4" src="./images/icon-household.png" alt="" />
+    <img class="logo-mark l1" src="./images/logo-badge.png" alt="" />
+    <img class="logo-mark l2" src="./images/logo-badge.png" alt="" />
+  </div>
+
+  <div class="offer-bar"><span>🎉 SPECIAL LAUNCH OFFER — ₹100 OFF on shopping ₹300 &amp; above &nbsp;•&nbsp; SAVO SURE Price on 100+ daily essentials &nbsp;•&nbsp; New store now open in Prakash Nagar &nbsp;•&nbsp;</span></div>
+
+  <header>
+    <div class="container header-wrapper">
+      <a href="#" class="logo">
+        <img src="./images/logo-horizontal.jpg" alt="SAVOmart" class="logo-full" />
+      </a>
+      <nav class="menu">
+        <a href="#categories">Categories</a>
+        <a href="#locator">Store Locator</a>
+        <a href="#why-us">Why Us</a>
+        <a href="#story">Our Story</a>
+        <a href="#contact">Contact</a>
+        <a href="#locator" class="cta-btn">📍 Find Nearest Store</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-panel">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <span class="hero-badge">✓ 50+ stores across Bengaluru</span>
+            <h1>Everyday low prices<br />on <em>everything</em> you need.</h1>
+            <p>Fresh fruits, vegetables, groceries and household essentials — at Bengaluru's most affordable neighbourhood mart. Quality you can trust, every single day.</p>
+            <div class="hero-actions">
+              <a href="#locator" class="btn-yellow">Find My Nearest Store</a>
+              <a href="#categories" class="btn-outline">Browse Categories</a>
+            </div>
+          </div>
+          <div class="hero-image">
+            <img src="./images/hero-akka.png" alt="Shop fresh at SAVOmart" />
+            <div class="hero-trust-chip"><span class="dot"></span>Trusted by 50k+ households</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="stat-strip">
+    <div class="container">
+      <div><div class="stat-num">50+</div><div class="stat-label">Store Locations</div></div>
+      <div><div class="stat-num">19</div><div class="stat-label">Stores on Map</div></div>
+      <div><div class="stat-num">7AM–10PM</div><div class="stat-label">Open Every Day</div></div>
+      <div><div class="stat-num">1-Tap</div><div class="stat-label">Nearest Store Lookup</div></div>
+    </div>
+  </div>
+
+  <section class="section" id="categories">
+    <div class="container">
+      <h2 class="section-title">Shop by Category</h2>
+      <p class="section-sub">Everything for your kitchen and home, curated.</p>
+      <div class="cat-grid">
+        <div class="cat-item"><div class="cat-photo-wrap"><img src="./images/categories/fnv@2x.png" alt="" /></div><span>Fruits &amp; Veg</span></div>
+        <div class="cat-item"><div class="cat-photo-wrap"><img src="./images/categories/dairy@2x.png" alt="" /></div><span>Dairy &amp; Bread</span></div>
+        <div class="cat-item"><div class="cat-photo-wrap"><img src="./images/categories/rice.png" alt="" /></div><span>Rice &amp; Atta</span></div>
+        <div class="cat-item"><div class="cat-photo-wrap"><img src="./images/categories/sugar.png" alt="" /></div><span>Sugar &amp; Salt</span></div>
+        <div class="cat-item"><div class="cat-photo-wrap"><img src="./images/categories/tea.png" alt="" /></div><span>Tea &amp; Coffee</span></div>
+        <div class="cat-item"><div class="cat-photo-wrap"><img src="./images/categories/snack.png" alt="" /></div><span>Snacks</span></div>
+        <div class="cat-item"><div class="cat-photo-wrap"><img src="./images/categories/oil.png" alt="" /></div><span>Oil &amp; Ghee</span></div>
+        <div class="cat-item"><div class="cat-photo-wrap"><img src="./images/categories/household.png" alt="" /></div><span>Household</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="locator">
+    <div class="container">
+      <h2 class="section-title">Find a SAVOmart Near You</h2>
+      <p class="section-sub">Tap "Find My Nearest Store" and we'll do the rest — or browse the map and list yourself.</p>
+      <div class="locator-grid">
+        <div class="map-panel">
+          <button class="find-fab" id="map-find-btn"><span class="pulse"></span>Find My Nearest Store</button>
+          <div id="store-map"></div>
+        </div>
+        <div class="sidebar-panel">
+          <div class="nearest-result" id="nearest-result">
+            <div class="tag">Nearest Store</div>
+            <h4 id="nearest-name">—</h4>
+            <p id="nearest-addr">—</p>
+            <span class="dist" id="nearest-dist">—</span><br />
+            <a href="#" target="_blank" class="directions-link" id="nearest-directions">↗ Get Directions</a>
+            <button class="back-link" id="back-to-all-btn">← Back to all stores</button>
+          </div>
+          <div class="locator-status" id="locator-status">Allow location access to find your nearest store — or pick one from the list below.</div>
+          <div class="store-list-title">All Stores (19)</div>
+          <div class="store-list" id="store-list"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="why-us">
+    <div class="container">
+      <h2 class="section-title" style="text-align:center;">Why Shop From Us?</h2>
+      <p class="section-sub" style="text-align:center;">The essentials, done right.</p>
+      <div class="why-grid">
+        <div class="why-card">
+          <img src="./images/wholesale-tag.svg" alt="" />
+          <h3>Wholesale prices, every day</h3>
+          <p>Enjoy unbeatable prices on all products.</p>
+        </div>
+        <div class="why-card">
+          <img src="./images/one-store.svg" alt="" />
+          <h3>Everything, in one store</h3>
+          <p>Fruits &amp; Vegetables, Grocery, Daily Fresh, Household Needs.</p>
+        </div>
+        <div class="why-card">
+          <img src="./images/discount-percent.svg" alt="" />
+          <h3>Guaranteed discounts</h3>
+          <p>Minimum 5% discount on MRP every day.</p>
+        </div>
+        <div class="why-card">
+          <img src="./images/budget-pack.svg" alt="" />
+          <h3>Budget-friendly packs</h3>
+          <p>Small packs which fit your budget.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="story">
+    <div class="container">
+      <div class="who-grid">
+        <div class="who-text">
+          <h2 class="section-title">Who We Are</h2>
+          <p class="section-sub">A mart built for the neighbourhood.</p>
+          <p>At SAVOmart, we believe everyone deserves access to quality essentials at prices they can afford. As we continue to grow across Bengaluru, we remain committed to affordability and quality — making grocery shopping a hassle-free experience for every household we serve.</p>
+        </div>
+        <img src="./images/who-we-are.png" alt="Who we are" />
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="reviews">
+    <div class="container">
+      <h2 class="section-title" style="text-align:center;">What Our Customers Say</h2>
+      <p class="section-sub" style="text-align:center;">Genuine Google reviews from real SAVOmart stores across Bengaluru, quoted as written.</p>
+      <div class="testi-carousel" id="testi-carousel">
+        <button class="testi-arrow testi-arrow-prev" id="testi-prev" aria-label="Previous review" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="testi-stage" id="testi-stage">
+          <div class="testi-card">
+            <div class="testi-stars">★★★★★</div>
+            <p class="testi-quote">"Best shopping destination for all type of daily needs and groceries. The sales person are so cooperative and courteous."</p>
+            <div class="testi-author">Chinmay Rout</div>
+            <div class="testi-meta"><a href="https://www.google.com/maps/search/SAVOmart+Oil+Mill+Road+Bangalore" target="_blank" rel="noopener">SAVOmart Oil Mill Road ↗</a></div>
+          </div>
+          <div class="testi-card">
+            <div class="testi-stars">★★★★★</div>
+            <p class="testi-quote">"I love shopping at Savomart! The staff members are incredibly friendly and helpful. It makes the whole shopping experience easy and pleasant"</p>
+            <div class="testi-author">hari babu</div>
+            <div class="testi-meta"><a href="https://www.google.com/maps/search/SAVOmart+Bommanahalli+Bangalore" target="_blank" rel="noopener">SAVOmart Bommanahalli ↗</a></div>
+          </div>
+          <div class="testi-card">
+            <div class="testi-stars">★★★★★</div>
+            <p class="testi-quote">"Good price in this Store for all products highly recommended to buy here"</p>
+            <div class="testi-author">Pavankumar.G pavi</div>
+            <div class="testi-meta"><a href="https://www.google.com/maps/search/SAVOmart+Muneshwara+Nagar+Bangalore" target="_blank" rel="noopener">SAVOmart Muneshwara Nagar ↗</a></div>
+          </div>
+          <div class="testi-card">
+            <div class="testi-stars">★★★★★</div>
+            <p class="testi-quote">"Very good customer service and products are of acceptable price. I recommend visiting and seeing for yourselves, it's worth your time."</p>
+            <div class="testi-author">Shashank R</div>
+            <div class="testi-meta"><a href="https://www.google.com/maps/search/SAVOmart+Rayasandra+Bangalore" target="_blank" rel="noopener">SAVOmart Rayasandra ↗</a></div>
+          </div>
+          <div class="testi-card">
+            <div class="testi-stars">★★★★★</div>
+            <p class="testi-quote">"Wow.. Happy to see the best price supermarket in our area. Best fruit and vegetables and cheapest price.. They have good rates for Rices, Dals and Biscuits"</p>
+            <div class="testi-author">Arun Joseph</div>
+            <div class="testi-meta"><a href="https://www.google.com/maps/search/SAVOmart+Binnipete+Bangalore" target="_blank" rel="noopener">SAVOmart Binnipete ↗</a></div>
+          </div>
+          <div class="testi-card">
+            <div class="testi-stars">★★★★★</div>
+            <p class="testi-quote">"The rates are reasonable. Good quality products are available. Staff behavior is good."</p>
+            <div class="testi-author">Anand Krishnaiah Setty</div>
+            <div class="testi-meta"><a href="https://www.google.com/maps/search/SAVOmart+Chikkalasandra+Hanumagiri+Layout+Bangalore" target="_blank" rel="noopener">SAVOmart Chikkalasandra ↗</a></div>
+          </div>
+          <div class="testi-card">
+            <div class="testi-stars">★★★★★</div>
+            <p class="testi-quote">"Good service and reasonable price, best super market for purchasing daily grocery and home and kitchen items."</p>
+            <div class="testi-author">Shashi Kumar</div>
+            <div class="testi-meta"><a href="https://www.google.com/maps/search/SAVOmart+Srinivasnagar+Banashankari+Bangalore" target="_blank" rel="noopener">SAVOmart Srinivasnagar ↗</a></div>
+          </div>
+        </div>
+        <button class="testi-arrow testi-arrow-next" id="testi-next" aria-label="Next review" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <footer id="contact">
+    <div class="container foot-bar">
+      <a href="mailto:support@ebono.com"><img src="./images/email.svg" alt="" />support@ebono.com</a>
+      <span class="foot-sep" aria-hidden="true">|</span>
+      <a href="tel:+18005714777"><img src="./images/phone.svg" alt="" />1800 571 4777</a>
+      <span class="foot-sep" aria-hidden="true">|</span>
+      <a href="https://in.linkedin.com/company/savomart" target="_blank" rel="noopener"><img src="./images/linkedin.svg" alt="" />LinkedIn</a>
+      <span class="foot-sep" aria-hidden="true">|</span>
+      <a href="./policy.html" class="foot-underline">Privacy Policy</a>
+      <span class="foot-sep" aria-hidden="true">|</span>
+      <a href="./terms-and-conditions.html" class="foot-underline">Terms and Conditions</a>
+      <span class="foot-sep" aria-hidden="true">|</span>
+      <span class="foot-copyright">© 2026 SAVOmart</span>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script>
+    // Approximate coordinates for demo purposes — illustrative, not survey-accurate.
+    const STORES = [
+      { name: "Prakash Nagar (Flagship)", addr: "3rd Cross, 7th Main Rd, Puttaswamy Rd, Opp. M.S.S High School", lat: 12.9911, lng: 77.5638, flagship: true },
+      { name: "Malleshwaram", addr: "8th Cross, Sampige Road", lat: 13.0035, lng: 77.5647 },
+      { name: "Rajajinagar", addr: "Dr. Rajkumar Road, 1st Block", lat: 12.9908, lng: 77.5551 },
+      { name: "Vijayanagar", addr: "Attiguppe Main Road", lat: 12.9719, lng: 77.5346 },
+      { name: "Basavanagudi", addr: "Bull Temple Road", lat: 12.9422, lng: 77.5738 },
+      { name: "Jayanagar", addr: "4th Block, 11th Main Road", lat: 12.9308, lng: 77.5838 },
+      { name: "Yelahanka New Town", addr: "3rd Phase Main Road", lat: 13.1007, lng: 77.5963 },
+      { name: "HBR Layout", addr: "2nd Block Main Road", lat: 13.0198, lng: 77.6412 },
+      { name: "Kalyan Nagar", addr: "HRBR Layout 1st Block", lat: 13.0223, lng: 77.6389 },
+      { name: "Mathikere", addr: "BEL Road", lat: 13.0296, lng: 77.5573 },
+      { name: "Nagasandra", addr: "Tumkur Road Service Lane", lat: 13.0459, lng: 77.4993 },
+      { name: "Kengeri", addr: "Kengeri Satellite Town", lat: 12.9081, lng: 77.4855 },
+      { name: "Bommanahalli", addr: "Hosur Road", lat: 12.9089, lng: 77.6221 },
+      { name: "Hulimavu", addr: "Bannerghatta Road", lat: 12.8836, lng: 77.5985 },
+      { name: "Vivek Nagar", addr: "Ulsoor Road", lat: 12.9495, lng: 77.6206 },
+      { name: "Kamakshipalya", addr: "Magadi Road", lat: 12.9976, lng: 77.5312 },
+      { name: "Hegganahalli", addr: "Bagalgunte Main Road", lat: 13.0219, lng: 77.5017 },
+      { name: "Kempegowda Nagar", addr: "K.G. Nagar Main Road", lat: 12.9553, lng: 77.5646 },
+      { name: "Sunkadakatte", addr: "Outer Ring Road", lat: 13.0111, lng: 77.4907 }
+    ];
+
+    const purpleIcon = (highlight) => L.divIcon({
+      className: "",
+      html: `<div style="width:${highlight ? 34 : 26}px;height:${highlight ? 34 : 26}px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${highlight ? '#ffd400' : '#5c2a82'};border:3px solid #fff;box-shadow:0 4px 10px rgba(0,0,0,0.35);"></div>`,
+      iconSize: [highlight ? 34 : 26, highlight ? 34 : 26],
+      iconAnchor: [highlight ? 17 : 13, highlight ? 34 : 26]
+    });
+
+    const map = L.map("store-map", { scrollWheelZoom: false }).setView([12.9716, 77.5946], 11);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap contributors",
+      maxZoom: 18
+    }).addTo(map);
+
+    const markers = STORES.map((s) => {
+      const m = L.marker([s.lat, s.lng], { icon: purpleIcon(false) }).addTo(map);
+      m.bindPopup(`<b>${s.name}</b><br>${s.addr}<br>Open 7:00 AM – 10:00 PM`);
+      return m;
+    });
+
+    let userMarker = null;
+
+    function toRad(deg) { return (deg * Math.PI) / 180; }
+    function haversineKm(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function renderStoreList(highlightIndex, distances) {
+      const list = document.getElementById("store-list");
+      const order = STORES.map((s, i) => i);
+      if (highlightIndex !== null) {
+        order.sort((a, b) => (a === highlightIndex ? -1 : b === highlightIndex ? 1 : 0));
+      }
+      list.innerHTML = order.map((i) => {
+        const s = STORES[i];
+        const isNearest = i === highlightIndex;
+        const distTxt = distances ? ` · ${distances[i].toFixed(1)} km` : "";
+        return `<div class="store-row ${isNearest ? "nearest" : ""}" data-idx="${i}">
+          <div class="name">${s.name}${isNearest ? '<span class="badge-nearest">Nearest</span>' : ""}</div>
+          <div class="addr">${s.addr}${distTxt}</div>
+        </div>`;
+      }).join("");
+
+      list.querySelectorAll(".store-row").forEach((row) => {
+        row.addEventListener("click", () => {
+          const idx = parseInt(row.dataset.idx, 10);
+          const s = STORES[idx];
+          map.setView([s.lat, s.lng], 15, { animate: false });
+          markers[idx].openPopup();
+        });
+      });
+    }
+    renderStoreList(null, null);
+
+    function setStatus(text, isError) {
+      const el = document.getElementById("locator-status");
+      el.textContent = text;
+      el.classList.toggle("error", !!isError);
+    }
+
+    function findNearest() {
+      if (!navigator.geolocation) {
+        setStatus("Geolocation isn't supported in this browser. Please pick a store from the list.", true);
+        return;
+      }
+      [document.getElementById("map-find-btn")].forEach(b => b.disabled = true);
+      setStatus("Locating you…");
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+
+          if (userMarker) map.removeLayer(userMarker);
+          userMarker = L.circleMarker([latitude, longitude], {
+            radius: 8, color: "#fff", weight: 3, fillColor: "#2f8ae0", fillOpacity: 1
+          }).addTo(map).bindPopup("You are here").openPopup();
+
+          const distances = STORES.map((s) => haversineKm(latitude, longitude, s.lat, s.lng));
+          let nearestIdx = 0;
+          distances.forEach((d, i) => { if (d < distances[nearestIdx]) nearestIdx = i; });
+
+          markers.forEach((m, i) => m.setIcon(purpleIcon(i === nearestIdx)));
+
+          const bounds = L.latLngBounds([[latitude, longitude], [STORES[nearestIdx].lat, STORES[nearestIdx].lng]]);
+          map.fitBounds(bounds, { padding: [60, 60], animate: false });
+          markers[nearestIdx].openPopup();
+
+          const s = STORES[nearestIdx];
+          document.getElementById("nearest-name").textContent = s.name;
+          document.getElementById("nearest-addr").textContent = s.addr;
+          document.getElementById("nearest-dist").textContent = `${distances[nearestIdx].toFixed(1)} km away`;
+          document.getElementById("nearest-directions").href = `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`;
+          document.getElementById("nearest-result").classList.add("show");
+
+          renderStoreList(nearestIdx, distances);
+          setStatus(`Found it! ${s.name} is your closest SAVOmart.`);
+          [document.getElementById("map-find-btn")].forEach(b => b.disabled = false);
+        },
+        (err) => {
+          setStatus("We couldn't access your location (" + err.message + "). Please allow location access, or pick a store from the list below.", true);
+          [document.getElementById("map-find-btn")].forEach(b => b.disabled = false);
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    }
+
+    document.getElementById("map-find-btn").addEventListener("click", findNearest);
+
+    const allStoresBounds = L.latLngBounds(STORES.map((s) => [s.lat, s.lng]));
+    document.getElementById("back-to-all-btn").addEventListener("click", () => {
+      markers.forEach((m) => m.setIcon(purpleIcon(false)));
+      map.closePopup();
+      map.fitBounds(allStoresBounds, { padding: [40, 40], animate: false });
+      document.getElementById("nearest-result").classList.remove("show");
+      renderStoreList(null, null);
+      setStatus("Allow location access to find your nearest store — or pick one from the list below.");
+    });
+
+    (function () {
+      const stage = document.getElementById("testi-stage");
+      const cards = Array.from(stage.children);
+      const n = cards.length;
+      let idx = 0;
+
+      // Shortest signed circular distance from `idx` to card `i` — this is what
+      // makes the wrap from last card back to first read as one small step
+      // forward instead of a swift pan back across every card in between.
+      function circularDiff(i) {
+        let diff = i - idx;
+        if (diff > n / 2) diff -= n;
+        if (diff < -n / 2) diff += n;
+        return diff;
+      }
+
+      function render() {
+        const step = cards[0].offsetWidth * 0.9;
+        cards.forEach((card, i) => {
+          const diff = circularDiff(i);
+          const abs = Math.abs(diff);
+          card.classList.toggle("is-active", diff === 0);
+          if (abs > 1) {
+            card.style.transform = `translateX(${diff * step}px) scale(0.7)`;
+            card.style.opacity = "0";
+            card.style.filter = "blur(10px)";
+            card.style.zIndex = "1";
+            card.style.pointerEvents = "none";
+          } else if (abs === 1) {
+            card.style.transform = `translateX(${diff * step}px) scale(0.82)`;
+            card.style.opacity = "0.38";
+            card.style.filter = "blur(4px)";
+            card.style.zIndex = "5";
+            card.style.pointerEvents = "none";
+          } else {
+            card.style.transform = "translateX(0px) scale(1)";
+            card.style.opacity = "1";
+            card.style.filter = "blur(0px)";
+            card.style.zIndex = "10";
+            card.style.pointerEvents = "auto";
+          }
+        });
+      }
+
+      function goTo(i) {
+        idx = (i + n) % n;
+        render();
+      }
+
+      render();
+      window.addEventListener("resize", render);
+
+      document.getElementById("testi-prev").addEventListener("click", () => { goTo(idx - 1); resetTimer(); });
+      document.getElementById("testi-next").addEventListener("click", () => { goTo(idx + 1); resetTimer(); });
+
+      let timer = setInterval(() => goTo(idx + 1), 4500);
+      function resetTimer() { clearInterval(timer); timer = setInterval(() => goTo(idx + 1), 4500); }
+
+      const carousel = document.getElementById("testi-carousel");
+      carousel.addEventListener("mouseenter", () => clearInterval(timer));
+      carousel.addEventListener("mouseleave", () => { timer = setInterval(() => goTo(idx + 1), 4500); });
+    })();
+  </script>
+</body>
+
+</html>
