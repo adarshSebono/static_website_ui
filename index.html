@@ -738,12 +738,12 @@
       document.getElementById("testi-prev").addEventListener("click", () => { goTo(idx - 1); resetTimer(); });
       document.getElementById("testi-next").addEventListener("click", () => { goTo(idx + 1); resetTimer(); });
 
-      let timer = setInterval(() => goTo(idx + 1), 4500);
-      function resetTimer() { clearInterval(timer); timer = setInterval(() => goTo(idx + 1), 4500); }
+      let timer = setInterval(() => goTo(idx + 1), 5000);
+      function resetTimer() { clearInterval(timer); timer = setInterval(() => goTo(idx + 1), 5000); }
 
       const carousel = document.getElementById("testi-carousel");
       carousel.addEventListener("mouseenter", () => clearInterval(timer));
-      carousel.addEventListener("mouseleave", () => { timer = setInterval(() => goTo(idx + 1), 4500); });
+      carousel.addEventListener("mouseleave", () => { timer = setInterval(() => goTo(idx + 1), 5000); });
     })();
   </script>
 </body>
